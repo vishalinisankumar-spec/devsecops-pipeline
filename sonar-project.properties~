@@ -1,0 +1,5 @@
+sonar.projectKey=vishalinisankumar-spec_devsecops-pipeline
+sonar.organization=vishalinisankumar-spec
+sonar.sources=.
+sonar.exclusions=node_modules/**,dist/**,.git/**
+
