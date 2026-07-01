@@ -24,3 +24,11 @@ jobs:
           args: >
             -Dsonar.projectKey=vishalinisankumar-spec_devsecops-pipeline
             -Dsonar.organization=vishalinisankumar-spec
+            -Dsonar.qualitygate.wait=true
+      
+      - name: Check Quality Gate
+        if: failure()
+        run: |
+          echo "❌ SonarQube Quality Gate Failed!"
+          echo "Build blocked due to critical vulnerabilities"
+          exit 1
