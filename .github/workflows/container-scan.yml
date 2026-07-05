@@ -1,0 +1,36 @@
+name: Container Scanning (Trivy)
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  trivy-scan:
+    name: Trivy Container Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Build Docker Image
+        run: docker build -t ecommerce-app:latest .
+      
+      - name: Run Trivy Scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'ecommerce-app:latest'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+      
+      - name: Upload Trivy Results
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'trivy-results.sarif'
+      
+      - name: Fail if Critical Found
+        run: |
+          if grep -q '"level": "CRITICAL"' trivy-results.sarif; then
+            echo "❌ Critical vulnerabilities found in container image!"
+            exit 1
+          fi
