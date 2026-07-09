@@ -1,0 +1,35 @@
+name: IaC Scanning (Checkov)
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  checkov:
+    name: Checkov IaC Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Run Checkov Scan
+        uses: bridgecrewio/checkov-action@master
+        with:
+          directory: terraform/
+          framework: terraform
+          output_format: sarif
+          output_file_path: checkov-results.sarif
+      
+      - name: Upload Checkov Results
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: 'checkov-results.sarif'
+      
+      - name: Fail if Critical Found
+        run: |
+          if grep -q '"level": "ERROR"' checkov-results.sarif; then
+            echo "❌ Critical IaC misconfigurations found!"
+            exit 1
+          fi
